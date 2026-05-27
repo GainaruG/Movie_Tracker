@@ -127,8 +127,8 @@ for ($i = 0; $i < 10; $i++) {
             
             --accent-even: #10b981;
             --accent-even-bg: rgba(16, 185, 129, 0.05);
-            --accent-odd: #f59e0b;
-            --accent-odd-bg: rgba(245, 158, 11, 0.05);
+            --accent-odd: #ef4444;
+            --accent-odd-bg: rgba(239, 68, 68, 0.05);
             
             --focus-ring: #3b82f6;
         }
@@ -347,12 +347,12 @@ for ($i = 0; $i < 10; $i++) {
             transform: translateY(-2px);
         }
 
-        .result-item.even {
+        .result-item.par {
             border-left: 3px solid var(--accent-even);
             background-color: var(--accent-even-bg);
         }
 
-        .result-item.odd {
+        .result-item.impar {
             border-left: 3px solid var(--accent-odd);
             background-color: var(--accent-odd-bg);
         }
@@ -372,11 +372,13 @@ for ($i = 0; $i < 10; $i++) {
             letter-spacing: 0.05em;
         }
 
-        .result-item.even .result-label {
+        .result-item.par .result-val,
+        .result-item.par .result-label {
             color: var(--accent-even);
         }
 
-        .result-item.odd .result-label {
+        .result-item.impar .result-val,
+        .result-item.impar .result-label {
             color: var(--accent-odd);
         }
 
@@ -433,7 +435,7 @@ for ($i = 0; $i < 10; $i++) {
         <header>
             <h1 class="logo">Parity.</h1>
             
-               
+                
             </p>
         </header>
 
