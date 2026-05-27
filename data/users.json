@@ -1,0 +1,16 @@
+[
+    {
+        "id": "usr_demo",
+        "name": "Demo User",
+        "email": "demo@movietracker.local",
+        "password": "$2y$12$iaaSdVvtRTE.7vViup2W0ufa0Bzp3TKdsk7LTYpqtXhxUiWGez1Hi",
+        "created_at": "2026-05-27T00:00:00+00:00"
+    },
+    {
+        "id": "usr_6a17034f15c798.37728850",
+        "name": "GAINARU GRIGORII",
+        "email": "mihaibuza67@gmail.com",
+        "password": "$2y$10$gxECiz0BY5\/xvDTOh7hAgObrxEc9aNLj9ECwx9okbaweIbuRw8k4a",
+        "created_at": "2026-05-27T16:44:31+02:00"
+    }
+]
