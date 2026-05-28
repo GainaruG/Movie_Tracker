@@ -12,5 +12,12 @@
         "email": "mihaibuza67@gmail.com",
         "password": "$2y$10$gxECiz0BY5\/xvDTOh7hAgObrxEc9aNLj9ECwx9okbaweIbuRw8k4a",
         "created_at": "2026-05-27T16:44:31+02:00"
+    },
+    {
+        "id": "usr_6a180fa52f2f20.08918812",
+        "name": "Lucas",
+        "email": "bucurovlucas@gmail.com",
+        "password": "$2y$10$7K1pPeec59i96iZTzEJIFey6LUx2lpqfWmzVqos0lCzBl2e58L5m.",
+        "created_at": "2026-05-28T11:49:25+02:00"
     }
 ]

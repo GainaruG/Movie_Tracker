@@ -3,6 +3,31 @@
   var THEME_KEY = 'mt-theme';
   var LANG_KEY = 'mt-lang';
 
+  function syncCompactNav() {
+    var nav = document.querySelector('.nfx-nav');
+    if (!nav) return;
+    var links = nav.querySelector('.nfx-nav-links');
+    var right = nav.querySelector('.nfx-nav-right');
+    var logo = nav.querySelector('.nfx-logo');
+    if (!links || !right || !logo) return;
+
+    // Measure full link width even when compact mode previously hid the menu.
+    var wasCompact = nav.classList.contains('nav-compact');
+    var wasOpen = links.classList.contains('open');
+    nav.classList.remove('nav-compact');
+    links.classList.remove('open');
+    links.style.display = 'flex';
+
+    var navWidth = nav.clientWidth;
+    var needed = logo.offsetWidth + links.scrollWidth + right.offsetWidth + 72;
+    var shouldCompact = window.innerWidth <= 1600 || needed > navWidth;
+
+    links.style.display = '';
+    nav.classList.toggle('nav-compact', shouldCompact);
+    if (!shouldCompact && wasOpen) links.classList.remove('open');
+    if (shouldCompact && wasCompact && wasOpen) links.classList.add('open');
+  }
+
   // Apply persisted theme immediately to avoid any flash.
   var savedTheme = localStorage.getItem(THEME_KEY);
   if (savedTheme !== 'light' && savedTheme !== 'dark') savedTheme = 'dark';
@@ -11,6 +36,8 @@
 
   // Sync language selector from localStorage if available and different from server value.
   document.addEventListener('DOMContentLoaded', function () {
+    syncCompactNav();
+    window.requestAnimationFrame(syncCompactNav);
     var sel = document.querySelector('[data-lang]');
     if (sel) {
       var savedLang = localStorage.getItem(LANG_KEY);
@@ -36,7 +63,19 @@
       return;
     }
     if (e.target.closest('[data-menu]')) {
+      e.stopPropagation();
       document.querySelector('[data-links]')?.classList.toggle('open');
+      document.querySelector('.profile-wrapper.open')?.classList.remove('open');
+      document.querySelector('.notif-wrapper.open')?.classList.remove('open');
+      return;
+    }
+    var menuLinks = document.querySelector('[data-links].open');
+    if (menuLinks) {
+      if (e.target.closest('[data-links] a')) {
+        menuLinks.classList.remove('open');
+      } else if (!e.target.closest('[data-links]')) {
+        menuLinks.classList.remove('open');
+      }
     }
     // Profile dropdown toggle
     var profileToggle = e.target.closest('[data-profile-toggle]');
@@ -113,6 +152,13 @@
       }
       document.querySelector('#detailsModal').classList.add('open');
     }
+  });
+
+  window.addEventListener('resize', function () {
+    syncCompactNav();
+    document.querySelector('[data-links].open')?.classList.remove('open');
+    document.querySelector('.profile-wrapper.open')?.classList.remove('open');
+    document.querySelector('.notif-wrapper.open')?.classList.remove('open');
   });
 
   document.addEventListener('change', function (e) {
