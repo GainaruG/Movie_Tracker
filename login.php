@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/php/auth.php';
-if (is_logged_in()) { header('Location: dashboard.php?lang=' . current_lang()); exit; }
+$addingAccount = isset($_GET['add']);
+if (is_logged_in() && !$addingAccount) { header('Location: dashboard.php?lang=' . current_lang()); exit; }
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
@@ -16,12 +17,12 @@ render_page_head(t('login'));
 <main class="auth">
   <section class="auth-art">
     <span class="eyebrow"><?php echo e(t('secure_access')); ?></span>
-    <h1 class="display"><?php echo e(t('login')); ?></h1>
-    <p class="lead"><?php echo e(t('login_intro')); ?></p>
+    <h1 class="display"><?php echo e($addingAccount ? t('add_account') : t('login')); ?></h1>
+    <p class="lead"><?php echo e($addingAccount ? t('add_account_intro') : t('login_intro')); ?></p>
   </section>
   <section class="auth-box">
     <form class="form-card" method="POST">
-      <h2 class="title"><?php echo e(t('login')); ?></h2>
+      <h2 class="title"><?php echo e($addingAccount ? t('add_account') : t('login')); ?></h2>
       <?php if ($error): ?><div class="alert error"><?php echo e($error); ?></div><?php endif; ?>
       <div class="field"><label><?php echo e(t('email')); ?></label><input type="email" name="email" required value="<?php echo e($_POST['email'] ?? ''); ?>"></div>
       <div class="field"><label><?php echo e(t('password')); ?></label><input type="password" name="password" required minlength="6"></div>

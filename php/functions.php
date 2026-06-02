@@ -103,6 +103,52 @@ function is_logged_in(): bool {
     return !empty($_SESSION['user']);
 }
 
+function saved_accounts(): array {
+    $accounts = $_SESSION['saved_accounts'] ?? [];
+    if (!empty($_SESSION['user']) && empty($accounts[$_SESSION['user']])) {
+        $accounts[$_SESSION['user']] = [
+            'email' => $_SESSION['user'],
+            'name' => $_SESSION['name'] ?? $_SESSION['user'],
+            'last_active' => date('c')
+        ];
+        $_SESSION['saved_accounts'] = $accounts;
+    }
+    return $accounts;
+}
+
+function save_account_session(array $user): void {
+    $email = $user['email'] ?? '';
+    if ($email === '') return;
+    $_SESSION['saved_accounts'][$email] = [
+        'email' => $email,
+        'name' => $user['name'] ?? $email,
+        'last_active' => date('c')
+    ];
+}
+
+function activate_account(string $email): bool {
+    $accounts = saved_accounts();
+    if (empty($accounts[$email])) {
+        return false;
+    }
+    $_SESSION['user'] = $accounts[$email]['email'];
+    $_SESSION['name'] = $accounts[$email]['name'];
+    $_SESSION['saved_accounts'][$email]['last_active'] = date('c');
+    return true;
+}
+
+function remove_saved_account(string $email): void {
+    unset($_SESSION['saved_accounts'][$email]);
+    if (($_SESSION['user'] ?? '') === $email) {
+        $next = reset($_SESSION['saved_accounts']);
+        if (is_array($next)) {
+            $_SESSION['user'] = $next['email'];
+            $_SESSION['name'] = $next['name'];
+        } else {
+            unset($_SESSION['user'], $_SESSION['name'], $_SESSION['saved_accounts']);
+        }
+    }
+}
 function require_login(): void {
     if (!is_logged_in()) {
         header('Location: login.php');
@@ -222,13 +268,28 @@ function render_nav(string $active = ''): void {
     echo '<button class="nfx-icon" data-theme-toggle type="button" aria-label="' . e(t('theme')) . '"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></button>';
     // Profile avatar with dropdown
     if (is_logged_in()) {
-        $userName = e($_SESSION['name'] ?? $_SESSION['user'] ?? 'User');
-        $initials = strtoupper(mb_substr($userName, 0, 1));
+        $rawUserName = $_SESSION['name'] ?? $_SESSION['user'] ?? 'User';
+        $currentEmail = $_SESSION['user'] ?? '';
+        $userName = e($rawUserName);
+        $initials = strtoupper(function_exists('mb_substr') ? mb_substr($rawUserName, 0, 1) : substr($rawUserName, 0, 1));
+        $accounts = saved_accounts();
         echo '<div class="profile-wrapper">';
-        echo '<button class="nfx-profile" data-profile-toggle title="' . $userName . '"><span class="nfx-profile-img">' . $initials . '</span><svg class="nfx-caret" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>';
+        echo '<button class="nfx-profile" data-profile-toggle title="' . $userName . '"><span class="nfx-profile-img">' . e($initials) . '</span><svg class="nfx-caret" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>';
         echo '<div class="profile-menu" data-profile-menu>';
-        echo '<div class="profile-menu-user"><span class="profile-menu-avatar">' . $initials . '</span><span class="profile-menu-name">' . $userName . '</span></div>';
+        echo '<div class="profile-menu-user"><span class="profile-menu-avatar">' . e($initials) . '</span><span class="profile-menu-name">' . $userName . '</span></div>';
+        if (!empty($accounts)) {
+            echo '<div class="profile-menu-divider"></div>';
+            echo '<div class="profile-menu-section-title">' . e(t('saved_accounts')) . '</div>';
+            foreach ($accounts as $account) {
+                $accountEmail = $account['email'] ?? '';
+                $accountNameRaw = $account['name'] ?? $accountEmail;
+                $accountInitial = strtoupper(function_exists('mb_substr') ? mb_substr($accountNameRaw, 0, 1) : substr($accountNameRaw, 0, 1));
+                $activeClass = ($accountEmail === $currentEmail) ? ' active' : '';
+                echo '<a class="profile-account' . $activeClass . '" href="' . e(url_lang('switch-account.php?action=switch&email=' . urlencode($accountEmail))) . '"><span class="profile-account-avatar">' . e($accountInitial) . '</span><span class="profile-account-info"><strong>' . e($accountNameRaw) . '</strong><small>' . e($accountEmail) . '</small></span><span class="profile-account-check">✓</span></a>';
+            }
+        }
         echo '<div class="profile-menu-divider"></div>';
+        echo '<a class="profile-menu-item" href="' . e(url_lang('login.php?add=1')) . '">＋ ' . e(t('add_account')) . '</a>';
         echo '<a class="profile-menu-item" href="' . e(url_lang('account.php')) . '"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' . e(t('manage_profiles')) . '</a>';
         echo '<a class="profile-menu-item" href="' . e(url_lang('account.php')) . '"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>' . e(t('account')) . '</a>';
         echo '<a class="profile-menu-item" href="' . e(url_lang('contact.php')) . '"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' . e(t('help')) . '</a>';

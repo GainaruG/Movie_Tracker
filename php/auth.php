@@ -15,6 +15,7 @@ function login_user(string $email, string $password): bool {
     if ($user && password_verify($password, $user['password'] ?? '')) {
         $_SESSION['user'] = $user['email'];
         $_SESSION['name'] = $user['name'];
+        save_account_session($user);
         return true;
     }
     return false;

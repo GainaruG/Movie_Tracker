@@ -141,6 +141,9 @@
   "remove_from_list": "Remove from list",
   "secure_access": "Secure access",
   "login_intro": "Use the demo account: demo@movietracker.local / demo123, or create your own.",
+  "add_account": "Add account",
+  "add_account_intro": "Sign in with another account to save it and switch between accounts quickly.",
+  "saved_accounts": "Saved accounts",
   "new_account": "New account",
   "register_intro": "Create an account. Your data is saved in users.json as per project requirements."
 }
